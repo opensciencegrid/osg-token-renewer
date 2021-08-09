@@ -4,10 +4,11 @@ Version:   0.1
 Release:   0%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
+BuildArch: noarch
 
-Source0: %{name}-%{version}.tar.gz
+Source0:   %{name}-%{version}.tar.gz
 
-Requires: oidc-agent
+Requires:  oidc-agent
 
 
 %description
