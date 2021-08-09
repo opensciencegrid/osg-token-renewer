@@ -3,8 +3,10 @@
 import configparser
 import subprocess
 import sys
+import os
 
 CONFIG_PATH = '/etc/osg/tokens/renewer.ini'
+OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 
 #As root, the user runs oidc-gen -w device ACCOUNT_SHORTNAME
 
@@ -53,6 +55,8 @@ def mktoken(cfg):
 def main():
     config = configparser.ConfigParser()
     config.read(CONFIG_PATH)
+    if 'OIDC_SOCK' not in os.environ:
+        os.environ['OIDC_SOCK'] = OIDC_SOCK
     make_all_tokens(config)
 
 
