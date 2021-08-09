@@ -5,11 +5,16 @@ Release:   0%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
 
+Source0: %{name}-%{version}.tar.gz
+
 Requires: oidc-agent
 
 
 %description
 %summary
+
+%prep
+%setup -q
 
 %build
 
