@@ -2,6 +2,7 @@
 
 import configparser
 import subprocess
+import sys
 
 CONFIG_PATH = '/etc/osg/tokens/renewer.ini'
 
@@ -40,9 +41,13 @@ def mktoken(cfg):
     dest    = cfg.get("token_path")
     print(cmdline)
     token_blob = subprocess.check_output(cmdline)
-    print("> %s" % dest)
-    with open(dest, "wb") as w:
-        w.write(token_blob)
+    if token_blob:
+        print("> %s" % dest)
+        with open(dest, "wb") as w:
+            w.write(token_blob)
+    else:
+        print("No token generated for account '%s'" % account[0],
+              file=sys.stderr)
 
 
 def main():
