@@ -52,5 +52,5 @@ def main():
 
 
 if __name__ == '__main__':
-    make_all_tokens()
+    main()
 
