@@ -54,7 +54,8 @@ def mktoken(cfg):
 
 def main():
     config = configparser.ConfigParser()
-    config.read(CONFIG_PATH)
+    config_path = os.environ.get("OSG_TOKEN_RENEWER_CONFIG_PATH", CONFIG_PATH)
+    config.read(config_path)
     if 'OIDC_SOCK' not in os.environ:
         os.environ['OIDC_SOCK'] = OIDC_SOCK
     make_all_tokens(config)
