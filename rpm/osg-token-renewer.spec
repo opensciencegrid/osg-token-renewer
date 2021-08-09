@@ -21,7 +21,7 @@ Requires:  oidc-agent
 
 %install
 install -d $RPM_BUILD_ROOT/%{_bindir}
-install -d $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
+install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 install -m 755 %{name}.py $RPM_BUILD_ROOT/%{_bindir}/%{name}
 install -m 600 renewer.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 
@@ -30,6 +30,7 @@ install -m 600 renewer.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 
+%dir %{_sysconfdir}/osg/tokens
 %config(noreplace) %{_sysconfdir}/osg/tokens/renewer.ini
 
 %changelog
