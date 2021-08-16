@@ -55,11 +55,16 @@ def validate_config_dict(cfgx):
 
 def add_all_accounts(cfgx):
     accounts = cfgx["account"]
+    added = set()
 
-    for acct in accounts:
+    for token in cfgx["token"]:
+        acct = cfgx["token"][token].get("account")
+        if acct in added:
+            continue
         print("account %s" % acct)
         pwfile = accounts[acct]['password_file']
         add_account(acct, pwfile)
+        added.add(acct)
 
 
 def make_all_tokens(cfgx):
