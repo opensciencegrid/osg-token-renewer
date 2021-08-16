@@ -5,7 +5,7 @@ import subprocess
 import sys
 import os
 
-CONFIG_PATH = '/etc/osg/tokens/renewer.ini'
+CONFIG_PATH = '/etc/osg/token-renewer/config.ini'
 OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 
 #As root, the user runs oidc-gen -w device ACCOUNT_SHORTNAME
