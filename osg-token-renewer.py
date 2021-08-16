@@ -53,28 +53,24 @@ def validate_config_dict(cfgx):
     return True
 
 
-def add_all_accounts(config):
-    accts = [ sec for sec in config.sections() if sec.startswith("account ") ]
+def add_all_accounts(cfgx):
+    accounts = cfgx["account"]
 
-    for acct in accts:
-        print(acct)
-        if 'password_file' not in config[acct]:
-            print("missing 'password_file' attr; skipping %s" % acct)
-            continue
-        shortname = acct.split()[1]
-        pwfile = config[acct]['password_file']
-        add_account(shortname, pwfile)
+    for acct in accounts:
+        print("account %s" % acct)
+        pwfile = accounts[acct]['password_file']
+        add_account(acct, pwfile)
 
 
-def make_all_tokens(config):
-    tokens = [ sec for sec in config.sections() if sec.startswith("token ") ]
+def make_all_tokens(cfgx):
+    tokens = cfgx["token"]
 
     for t in tokens:
-        print(t)
-        for k,v in config[t].items():
+        print("token %s" % t)
+        for k,v in tokens[t].items():
             print("{}: {}".format(k,v))
         print("---")
-        mktoken(config[t])
+        mktoken(tokens[t])
         print("===")
 
 
@@ -120,8 +116,8 @@ def main():
     if not cfgx or not validate_config_dict(cfgx):
         sys.exit(1)
 
-    add_all_accounts(config)
-    make_all_tokens(config)
+    add_all_accounts(cfgx)
+    make_all_tokens(cfgx)
 
 
 if __name__ == '__main__':
