@@ -16,6 +16,43 @@ OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 # oidc-token --aud="<SERVER AUDIENCE>" <CLIENT NAME>
 
 
+def get_config_dict(config):
+    cfgx = dict(account={}, token={})
+
+    for sec in config.sections():
+        ss = sec.split()
+        if len(ss) != 2 or ss[0] not in cfgx:
+            print("Unrecognized section '%s'" % sec, file=sys.stderr)
+            return None
+        type_, name = ss
+        cfgx[name] = config[sec]
+
+    return cfgd
+
+
+def validate_config_dict(cfgx):
+    # the only mandatory attributes here are:
+    #  - [token TOKEN].account exists, and references [account ACCOUNT]
+    #  - [account ACCOUNT].password_file exists
+
+    for token in cfgx["token"]:
+        account = cfgx["token"][token].get("account")
+        if not account:
+            print("token %s: missing 'account' attribute" % token,
+                  file=sys.stderr)
+            return False
+        elif account not in cfgx["account"]:
+            print("token %s: missing 'account %s' section" % (token, account),
+                  file=sys.stderr)
+            return False
+        elif not cfgx["account"][account].get("password_file"):
+            print("account %s: missing 'password_file' attribute" % account,
+                  file=sys.stderr)
+            return False
+
+    return True
+
+
 def add_all_accounts(config):
     accts = [ sec for sec in config.sections() if sec.startswith("account ") ]
 
@@ -78,6 +115,11 @@ def main():
     config.read(config_path)
     if 'OIDC_SOCK' not in os.environ:
         os.environ['OIDC_SOCK'] = OIDC_SOCK
+
+    cfgx = get_config_dict(config)
+    if not cfgx or not validate_config_dict(cfgx):
+        sys.exit(1)
+
     add_all_accounts(config)
     make_all_tokens(config)
 
