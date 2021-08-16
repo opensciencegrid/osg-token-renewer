@@ -2,15 +2,15 @@
 Description=Renew oidc-agent proxies
 
 [Service]
-#User=osg-token-svc
-#Group=osg-token-svc
+User=osg-token-svc
+Group=osg-token-svc
 Type = oneshot
 ExecStart = /usr/bin/osg-token-renewer.sh
 
-## These provide dedicated user with the ability to switch UIDs/GIDs for
-## reading/writing files.
-#CapabilityBoundingSet=CAP_SETUID CAP_SETGID
-#Capabilities=CAP_SETGID+p CAP_SETUID+p
+# These provide dedicated user with the ability to switch UIDs/GIDs for
+# reading/writing files.
+CapabilityBoundingSet=CAP_SETUID CAP_SETGID
+Capabilities=CAP_SETGID+p CAP_SETUID+p
 
 [Install]
 WantedBy=multi-user.target
