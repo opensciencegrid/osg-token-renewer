@@ -25,7 +25,7 @@ def get_config_dict(config):
             print("Unrecognized section '%s'" % sec, file=sys.stderr)
             return None
         type_, name = ss
-        cfgx[name] = config[sec]
+        cfgx[type_][name] = config[sec]
 
     return cfgd
 
