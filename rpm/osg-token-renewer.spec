@@ -10,6 +10,8 @@ Source0:   %{name}-%{version}.tar.gz
 
 Requires:  oidc-agent
 
+%define svc_acct osg-token-svc
+
 
 %description
 %summary
@@ -29,6 +31,12 @@ install -m 600 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.timer $RPM_BUILD_ROOT/%{_unitdir}
+
+%pre
+getent group  %svc_acct >/dev/null || groupadd -r %svc_acct
+getent passwd %svc_acct >/dev/null || \
+       useradd -r -g %svc_acct -c "OSG Token Renewal Service" \
+       -s /sbin/nologin -d %{_localstatedir}/spool/%svc_acct %svc_acct
 
 %post
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
