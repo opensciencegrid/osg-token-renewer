@@ -27,7 +27,7 @@ def get_config_dict(config):
         type_, name = ss
         cfgx[type_][name] = config[sec]
 
-    return cfgd
+    return cfgx
 
 
 def validate_config_dict(cfgx):
