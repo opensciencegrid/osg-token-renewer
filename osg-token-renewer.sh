@@ -2,7 +2,7 @@
 
 eval $(oidc-agent) >/dev/null
 osg-token-renewer
-kill "$OIDCD_PID"
+oidc-agent -k
 
 # oidc-agent does not clean up its old socket files, apparently
 if [[ $OIDC_SOCK = /tmp/oidc-*/oidc-agent.* ]]; then
