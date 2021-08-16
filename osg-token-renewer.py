@@ -68,7 +68,7 @@ def mktoken(cfg):
 def add_account(acct, pwfile):
     pwcmd = "cat '%s'" % pwfile.replace("'", r"'\''")
     cmd = ["oidc-add", "--pw-cmd=%s" % pwcmd, acct]
-    out = subprocess.check_output(cmd)
+    out = subprocess.check_output(cmd).strip().decode('utf-8')
     print("# oidc-add ... %s (%s)" % (acct, out))
 
 
