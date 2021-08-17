@@ -27,6 +27,7 @@ install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -m 755 %{name}.py $RPM_BUILD_ROOT/%{_bindir}/%{name}
 install -m 755 %{name}.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}.sh
+install -m 755 %{name}-setup.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}-setup.sh
 install -m 600 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
@@ -51,6 +52,7 @@ getent passwd %svc_acct >/dev/null || \
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_bindir}/%{name}.sh
+%{_bindir}/%{name}-setup.sh
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.timer
 
