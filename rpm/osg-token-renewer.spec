@@ -12,6 +12,8 @@ Requires:  oidc-agent
 
 %define svc_acct osg-token-svc
 
+%define __python /usr/bin/python3
+
 
 %description
 %summary
@@ -22,6 +24,9 @@ Requires:  oidc-agent
 %build
 
 %install
+find . -type f -exec \
+    sed -ri '1s,^#!\s*(/usr)?/bin/(env *)?python.*,#!%{__python},' '{}' +
+
 install -d $RPM_BUILD_ROOT/%{_bindir}
 install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 install -dm750 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
