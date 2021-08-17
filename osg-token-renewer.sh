@@ -2,7 +2,7 @@
 
 eval $(oidc-agent) >/dev/null
 osg-token-renewer
-oidc-agent -k
+oidc-agent -k >/dev/null
 
 # oidc-agent does not clean up its old socket files, apparently
 if [[ $OIDC_SOCK = /tmp/oidc-*/oidc-agent.* ]]; then
