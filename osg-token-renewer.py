@@ -110,6 +110,14 @@ def add_account(acct, pwfile):
     print("# oidc-add ... %s (%s)" % (acct, out))
 
 
+def get_uid(name):
+    return pwd.getpwnam(name).pw_uid  # also, .pw_gid
+
+
+def get_gid(gname):
+    return grp.getgrnam(gname).gr_gid
+
+
 def main():
     config = configparser.ConfigParser()
     config_path = os.environ.get("OSG_TOKEN_RENEWER_CONFIG_PATH", CONFIG_PATH)
