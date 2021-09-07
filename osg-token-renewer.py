@@ -16,14 +16,17 @@ OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 # oidc-token --aud="<SERVER AUDIENCE>" <CLIENT NAME>
 
 
+def emsg(msg):
+    print(msg, file=sys.stderr)
+
+
 def get_config_dict(config):
     cfgx = dict(account={}, token={})
 
     for sec in config.sections():
         ss = sec.split()
         if len(ss) != 2 or ss[0] not in cfgx:
-            print("Unrecognized section '%s'" % sec, file=sys.stderr)
-            return None
+            return emsg(f"Unrecognized section '{sec}'")
         type_, name = ss
         cfgx[type_][name] = config[sec]
 
@@ -38,21 +41,13 @@ def validate_config_dict(cfgx):
     for token in cfgx["token"]:
         account = cfgx["token"][token].get("account")
         if not account:
-            print("token %s: missing 'account' attribute" % token,
-                  file=sys.stderr)
-            return False
+            return emsg(f"token {token}: missing 'account' attribute")
         elif account not in cfgx["account"]:
-            print("token %s: missing 'account %s' section" % (token, account),
-                  file=sys.stderr)
-            return False
+            return emsg(f"token {token}: missing 'account {account}' section")
         elif not cfgx["account"][account].get("password_file"):
-            print("account %s: missing 'password_file' attribute" % account,
-                  file=sys.stderr)
-            return False
+            return emsg(f"account {account}: missing 'password_file' attribute")
         elif not cfgx["token"][token].get("token_path")
-            print("token %s: missing 'token_path' attribute" % token,
-                  file=sys.stderr)
-            return False
+            return emsg(f"token {token}: missing 'token_path' attribute")
 
     return True
 
@@ -103,8 +98,7 @@ def mktoken(cfg):
         with open(dest, "wb") as w:
             w.write(token_blob)
     else:
-        print("No token generated for account '%s'" % account[0],
-              file=sys.stderr)
+        emsg(f"No token generated for account '{account[0]}'")
 
 
 def add_account(acct, pwfile):
