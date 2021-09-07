@@ -49,6 +49,10 @@ def validate_config_dict(cfgx):
             print("account %s: missing 'password_file' attribute" % account,
                   file=sys.stderr)
             return False
+        elif not cfgx["token"][token].get("token_path")
+            print("token %s: missing 'token_path' attribute" % token,
+                  file=sys.stderr)
+            return False
 
     return True
 
