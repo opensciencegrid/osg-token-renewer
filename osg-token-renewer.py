@@ -68,14 +68,28 @@ def add_all_accounts(cfgx):
 
 def make_all_tokens(cfgx):
     tokens = cfgx["token"]
+    errors = 0
 
     for t in tokens:
         print("token %s" % t)
         for k,v in tokens[t].items():
             print("{}: {}".format(k,v))
         print("---")
-        mktoken(tokens[t])
+        try:
+            mktoken(tokens[t])
+        except subprocess.CalledProcessError as e:
+            emsg(f"Failed to create token '{t}': {e}")
+            errors += 1
+        except subprocess.CalledProcessError as e:
+            emsg(f"Failed to create token '{t}': {e}")
+            errors += 1
+        except IOError as e:
+            emsg(f"Failed to write token '{t}': {e}")
+            errors += 1
+
         print("===")
+
+        return errors
 
 
 def option_if(name, val):
@@ -131,10 +145,13 @@ def main():
     if not cfgx or not validate_config_dict(cfgx):
         sys.exit(1)
 
+    errors = 0
     add_all_accounts(cfgx)
-    make_all_tokens(cfgx)
+    errors += make_all_tokens(cfgx)
+
+    return errors
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() > 1)
 
