@@ -55,6 +55,7 @@ def validate_config_dict(cfgx):
 def add_all_accounts(cfgx):
     accounts = cfgx["account"]
     added = set()
+    errors = 0
 
     for token in cfgx["token"]:
         acct = cfgx["token"][token].get("account")
@@ -62,8 +63,14 @@ def add_all_accounts(cfgx):
             continue
         print("account %s" % acct)
         pwfile = accounts[acct]['password_file']
-        add_account(acct, pwfile)
+        try:
+            add_account(acct, pwfile)
+        except subprocess.CalledProcessError as e:
+            emsg(f"Failed to create account '{acct}': {e}")
+            errors += 1
         added.add(acct)
+
+    return errors
 
 
 def make_all_tokens(cfgx):
@@ -145,8 +152,7 @@ def main():
     if not cfgx or not validate_config_dict(cfgx):
         sys.exit(1)
 
-    errors = 0
-    add_all_accounts(cfgx)
+    errors = add_all_accounts(cfgx)
     errors += make_all_tokens(cfgx)
 
     return errors
