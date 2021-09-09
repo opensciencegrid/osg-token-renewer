@@ -46,7 +46,7 @@ def validate_config_dict(cfgx):
             return emsg(f"token {token}: missing 'account {account}' section")
         elif not cfgx["account"][account].get("password_file"):
             return emsg(f"account {account}: missing 'password_file' attribute")
-        elif not cfgx["token"][token].get("token_path")
+        elif not cfgx["token"][token].get("token_path"):
             return emsg(f"token {token}: missing 'token_path' attribute")
 
     return True
