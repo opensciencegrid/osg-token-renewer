@@ -16,39 +16,48 @@ OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 # oidc-token --aud="<SERVER AUDIENCE>" <CLIENT NAME>
 
 
+def emsg(msg, **fmtkw):
+    print(msg.format(**fmtkw), file=sys.stderr)
+
+
 def get_config_dict(config):
     cfgx = dict(account={}, token={})
 
     for sec in config.sections():
         ss = sec.split()
         if len(ss) != 2 or ss[0] not in cfgx:
-            print("Unrecognized section '%s'" % sec, file=sys.stderr)
-            return None
+            return emsg(f"Unrecognized config section '{sec}'")
         type_, name = ss
         cfgx[type_][name] = config[sec]
 
     return cfgx
 
 
+E_NO_TOK_ACCT_ATTR = (
+    "Config section [token {token}]: missing 'account' attribute")
+E_NO_TOK_ACCT_SEC  = (
+    "Config for [token {token}]: missing [account {account}] section")
+E_NO_TOK_PATH_ATTR = (
+    "Config section [token {token}]: missing 'token_path' attribute")
+E_NO_ACCT_PW_ATTR  = (
+    "Config section [account {account}]: missing 'password_file' attribute")
+
 def validate_config_dict(cfgx):
     # the only mandatory attributes here are:
     #  - [token TOKEN].account exists, and references [account ACCOUNT]
+    #  - [token TOKEN].token_path exists
     #  - [account ACCOUNT].password_file exists
 
     for token in cfgx["token"]:
         account = cfgx["token"][token].get("account")
         if not account:
-            print("token %s: missing 'account' attribute" % token,
-                  file=sys.stderr)
-            return False
+            return emsg(E_NO_TOK_ACCT_ATTR, token=token)
         elif account not in cfgx["account"]:
-            print("token %s: missing 'account %s' section" % (token, account),
-                  file=sys.stderr)
-            return False
+            return emsg(E_NO_TOK_ACCT_SEC, token=token, account=account)
+        elif not cfgx["token"][token].get("token_path"):
+            return emsg(E_NO_TOK_PATH_ATTR, token=token)
         elif not cfgx["account"][account].get("password_file"):
-            print("account %s: missing 'password_file' attribute" % account,
-                  file=sys.stderr)
-            return False
+            return emsg(E_NO_ACCT_PW_ATTR, account=account)
 
     return True
 
@@ -56,6 +65,7 @@ def validate_config_dict(cfgx):
 def add_all_accounts(cfgx):
     accounts = cfgx["account"]
     added = set()
+    errors = 0
 
     for token in cfgx["token"]:
         acct = cfgx["token"][token].get("account")
@@ -63,20 +73,32 @@ def add_all_accounts(cfgx):
             continue
         print("account %s" % acct)
         pwfile = accounts[acct]['password_file']
-        add_account(acct, pwfile)
+        try:
+            add_account(acct, pwfile)
+        except subprocess.CalledProcessError as e:
+            emsg(f"Failed to create account '{acct}': {e}")
+            errors += 1
         added.add(acct)
+
+    return errors
 
 
 def make_all_tokens(cfgx):
     tokens = cfgx["token"]
+    errors = 0
 
     for t in tokens:
         print("token %s" % t)
-        for k,v in tokens[t].items():
-            print("{}: {}".format(k,v))
-        print("---")
-        mktoken(tokens[t])
-        print("===")
+        try:
+            mktoken(tokens[t])
+        except subprocess.CalledProcessError as e:
+            emsg(f"Failed to create token '{t}': {e}")
+            errors += 1
+        except IOError as e:
+            emsg(f"Failed to write token '{t}': {e}")
+            errors += 1
+
+        return errors
 
 
 def option_if(name, val):
@@ -99,8 +121,7 @@ def mktoken(cfg):
         with open(dest, "wb") as w:
             w.write(token_blob)
     else:
-        print("No token generated for account '%s'" % account[0],
-              file=sys.stderr)
+        emsg(f"No token generated for account '{account[0]}'")
 
 
 def add_account(acct, pwfile):
@@ -133,10 +154,12 @@ def main():
     if not cfgx or not validate_config_dict(cfgx):
         sys.exit(1)
 
-    add_all_accounts(cfgx)
-    make_all_tokens(cfgx)
+    errors = add_all_accounts(cfgx)
+    errors += make_all_tokens(cfgx)
+
+    return errors
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() > 0)
 
