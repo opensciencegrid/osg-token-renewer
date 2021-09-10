@@ -16,8 +16,8 @@ OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 # oidc-token --aud="<SERVER AUDIENCE>" <CLIENT NAME>
 
 
-def emsg(msg):
-    print(msg, file=sys.stderr)
+def emsg(msg, **fmtkw):
+    print(msg.format(**fmtkw), file=sys.stderr)
 
 
 def get_config_dict(config):
@@ -26,28 +26,38 @@ def get_config_dict(config):
     for sec in config.sections():
         ss = sec.split()
         if len(ss) != 2 or ss[0] not in cfgx:
-            return emsg(f"Unrecognized configuration section '{sec}'")
+            return emsg(f"Unrecognized config section '{sec}'")
         type_, name = ss
         cfgx[type_][name] = config[sec]
 
     return cfgx
 
 
+E_NO_TOK_ACCT_ATTR = (
+    "Config section [token {token}]: missing 'account' attribute")
+E_NO_TOK_ACCT_SEC  = (
+    "Config for [token {token}]: missing [account {account}] section")
+E_NO_TOK_PATH_ATTR = (
+    "Config section [token {token}]: missing 'token_path' attribute")
+E_NO_ACCT_PW_ATTR  = (
+    "Config section [account {account}]: missing 'password_file' attribute")
+
 def validate_config_dict(cfgx):
     # the only mandatory attributes here are:
     #  - [token TOKEN].account exists, and references [account ACCOUNT]
+    #  - [token TOKEN].token_path exists
     #  - [account ACCOUNT].password_file exists
 
     for token in cfgx["token"]:
         account = cfgx["token"][token].get("account")
         if not account:
-            return emsg(f"token {token}: missing 'account' attribute")
+            return emsg(E_NO_TOK_ACCT_ATTR, token=token)
         elif account not in cfgx["account"]:
-            return emsg(f"token {token}: missing 'account {account}' section")
-        elif not cfgx["account"][account].get("password_file"):
-            return emsg(f"account {account}: missing 'password_file' attribute")
+            return emsg(E_NO_TOK_ACCT_SEC, token=token, account=account)
         elif not cfgx["token"][token].get("token_path"):
-            return emsg(f"token {token}: missing 'token_path' attribute")
+            return emsg(E_NO_TOK_PATH_ATTR, token=token)
+        elif not cfgx["account"][account].get("password_file"):
+            return emsg(E_NO_ACCT_PW_ATTR, account=account)
 
     return True
 
