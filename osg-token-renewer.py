@@ -89,9 +89,6 @@ def make_all_tokens(cfgx):
 
     for t in tokens:
         print("token %s" % t)
-        for k,v in tokens[t].items():
-            print("{}: {}".format(k,v))
-        print("---")
         try:
             mktoken(tokens[t])
         except subprocess.CalledProcessError as e:
@@ -100,8 +97,6 @@ def make_all_tokens(cfgx):
         except IOError as e:
             emsg(f"Failed to write token '{t}': {e}")
             errors += 1
-
-        print("===")
 
         return errors
 
