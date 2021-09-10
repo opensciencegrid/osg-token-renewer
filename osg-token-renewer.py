@@ -87,9 +87,6 @@ def make_all_tokens(cfgx):
         except subprocess.CalledProcessError as e:
             emsg(f"Failed to create token '{t}': {e}")
             errors += 1
-        except subprocess.CalledProcessError as e:
-            emsg(f"Failed to create token '{t}': {e}")
-            errors += 1
         except IOError as e:
             emsg(f"Failed to write token '{t}': {e}")
             errors += 1
