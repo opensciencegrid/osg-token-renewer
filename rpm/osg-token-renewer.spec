@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.1
+Version:   0.2
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -65,6 +65,13 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,root,%svc_acct) %config(noreplace) %{_sysconfdir}/osg/token-renewer/config.ini
 
 %changelog
+* Fri Sep 10 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.2-1
+- Address code review comments (SOFTWARE-4719)
+  - Improve config validation & error messages
+  - Improve error handling; continue on errors
+  - Increase the systemd timer frequency
+- Add README leftovers from usage doc (SOFTWARE-4763)
+
 * Tue Aug 17 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.1-1
 - Initial pre-release
 
