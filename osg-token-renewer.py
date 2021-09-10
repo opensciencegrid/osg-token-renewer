@@ -26,7 +26,7 @@ def get_config_dict(config):
     for sec in config.sections():
         ss = sec.split()
         if len(ss) != 2 or ss[0] not in cfgx:
-            return emsg(f"Unrecognized section '{sec}'")
+            return emsg(f"Unrecognized configuration section '{sec}'")
         type_, name = ss
         cfgx[type_][name] = config[sec]
 
@@ -156,5 +156,5 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main() > 1)
+    sys.exit(main() > 0)
 
