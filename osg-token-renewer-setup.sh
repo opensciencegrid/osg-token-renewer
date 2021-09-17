@@ -6,9 +6,7 @@ fail () { echo "$@" >&2; exit 1; }
 usage () {
   echo "usage: $(basename "$0") [options] CLIENT_NAME"
   echo
-  echo "   eg: $(basename "$0") \\"
-  echo "           myclient123 https://wlcg.cloud.cnaf.infn.it/" \
-                   "wlcg offline_access"
+  echo "   eg: $(basename "$0") myclient123"
   echo
   echo "Options:"
   echo "  --pw-file /path/to/pwfile"

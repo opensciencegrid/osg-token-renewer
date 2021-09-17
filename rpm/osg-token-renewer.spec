@@ -37,6 +37,7 @@ install -m 640 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.timer $RPM_BUILD_ROOT/%{_unitdir}
+install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%svc_acct
 
 %pre
 getent group  %svc_acct >/dev/null || groupadd -r %svc_acct
@@ -60,6 +61,7 @@ getent passwd %svc_acct >/dev/null || \
 %{_bindir}/%{name}-setup.sh
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.timer
+%dir %{_localstatedir}/spool/%svc_acct
 
 %dir %{_sysconfdir}/osg/tokens
 %attr(-,root,%svc_acct) %config(noreplace) %{_sysconfdir}/osg/token-renewer/config.ini
