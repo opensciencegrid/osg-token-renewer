@@ -4,7 +4,7 @@ set -e
 fail () { echo "$@" >&2; exit 1; }
 
 usage () {
-  echo "usage: $(basename "$0") [options] CLIENT_NAME ISSUER scopes..."
+  echo "usage: $(basename "$0") [options] CLIENT_NAME"
   echo
   echo "   eg: $(basename "$0") \\"
   echo "           myclient123 https://wlcg.cloud.cnaf.infn.it/" \
@@ -22,12 +22,10 @@ case $1 in
 esac
 done
 
-[[ $2 ]] || usage
+[[ $1 ]] || usage
+[[ $2 ]] && usage
 
 client_name=$1
-issuer=$2  # https://wlcg.cloud.cnaf.infn.it/
-shift 2
-scopes=$*
 [[ $pwfile ]] || pwfile=/etc/osg/tokens/$client_name.pw
 
 cleanup () {
@@ -50,9 +48,7 @@ fi 9<"$pwfile"
 eval $(oidc-agent)
 trap cleanup EXIT
 
-( echo "$issuer"
-  echo "$scopes"
-) | oidc-gen -w device --pw-cmd="cat '$pwfile'" "$client_name"
+oidc-gen -w device --pw-cmd="cat '$pwfile'" "$client_name"
 
 echo
 echo
