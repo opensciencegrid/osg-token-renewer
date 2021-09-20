@@ -40,7 +40,7 @@ fail "please create /etc/osg/tokens/$client_name.pw with encryption password"
 if [[ $UID = 0 ]]; then
   # open $pwfile as root, then re-run this script under service account
   exec su osg-token-svc -s /bin/bash -c '"$@"' -- - \
-  "$0" --pw-file /dev/fd/9 "$client_name" "$@"
+  "$0" --pw-file /dev/fd/9 "$client_name"
 fi 9<"$pwfile"
 
 eval $(oidc-agent)

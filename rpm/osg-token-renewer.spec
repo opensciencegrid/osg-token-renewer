@@ -1,7 +1,7 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.4
-Release:   3%{?dist}
+Version:   0.5
+Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
 BuildArch: noarch
@@ -67,6 +67,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
 %changelog
+* Mon Sep 20 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.5-1
+- Fixes for example config and setup script (SOFTWARE-4719)
+
 * Mon Sep 20 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.4-3
 - Fix ownership of service home dir (SOFTWARE-4719)
 
