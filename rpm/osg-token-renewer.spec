@@ -42,7 +42,7 @@ install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%svc_acct
 %pre
 getent group  %svc_acct >/dev/null || groupadd -r %svc_acct
 getent passwd %svc_acct >/dev/null || \
-       useradd -r -g %svc_acct -c "OSG Token Renewal Service" \
+       useradd -r -m -g %svc_acct -c "OSG Token Renewal Service" \
        -s /sbin/nologin -d %{_localstatedir}/spool/%svc_acct %svc_acct
 
 %post
