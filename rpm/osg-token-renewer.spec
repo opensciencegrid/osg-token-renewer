@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.3
+Version:   0.4
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -37,11 +37,12 @@ install -m 640 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.timer $RPM_BUILD_ROOT/%{_unitdir}
+install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%svc_acct
 
 %pre
 getent group  %svc_acct >/dev/null || groupadd -r %svc_acct
 getent passwd %svc_acct >/dev/null || \
-       useradd -r -g %svc_acct -c "OSG Token Renewal Service" \
+       useradd -r -m -g %svc_acct -c "OSG Token Renewal Service" \
        -s /sbin/nologin -d %{_localstatedir}/spool/%svc_acct %svc_acct
 
 %post
@@ -60,11 +61,15 @@ getent passwd %svc_acct >/dev/null || \
 %{_bindir}/%{name}-setup.sh
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.timer
+%dir %{_localstatedir}/spool/%svc_acct
 
 %dir %{_sysconfdir}/osg/tokens
 %attr(-,root,%svc_acct) %config(noreplace) %{_sysconfdir}/osg/token-renewer/config.ini
 
 %changelog
+* Fri Sep 17 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.4-1
+- Have user interact with oidc-gen via setup command (SOFTWARE-4719)
+
 * Thu Sep 16 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.3-1
 - Fix capabilities config in systemd unit (#3)
 
