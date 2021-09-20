@@ -67,6 +67,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
 %changelog
+* Mon Sep 20 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.4-3
+- Fix ownership of service home dir (SOFTWARE-4719)
+
 * Mon Sep 20 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.4-2
 - Create service home dir in packaging but not in %pre (SOFTWARE-4719)
 
