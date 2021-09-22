@@ -10,8 +10,7 @@ ExecStart = /usr/bin/osg-token-renewer.sh
 # These provide dedicated user with the ability to switch UIDs/GIDs for
 # reading/writing files.
 CapabilityBoundingSet=CAP_SETUID CAP_SETGID CAP_DAC_OVERRIDE
-Capabilities=CAP_SETGID+ep CAP_SETUID+ep
-SecureBits=keep-caps
+AmbientCapabilities=CAP_SETGID CAP_SETUID CAP_DAC_OVERRIDE
 
 [Install]
 WantedBy=multi-user.target

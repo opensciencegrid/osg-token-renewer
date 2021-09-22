@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.5
+Version:   0.6
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -67,6 +67,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
 %changelog
+* Wed Sep 22 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.6-1
+- Set AmbientCapabilities in systemd unit, for child processes (SOFTWARE-4719)
+
 * Mon Sep 20 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.5-1
 - Fixes for example config and setup script (SOFTWARE-4719)
 
