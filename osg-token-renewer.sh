@@ -6,7 +6,11 @@ oidc-agent -k >/dev/null
 
 # oidc-agent does not clean up its old socket files, apparently
 if [[ $OIDC_SOCK = /tmp/oidc-*/oidc-agent.* ]]; then
-  [[ -e $OIDC_SOCK ]] && rm -f "$OIDC_SOCK"
-  [[ -d ${OIDC_SOCK%/*} ]] && rmdir "${OIDC_SOCK%/*}"
+  if [[ -e $OIDC_SOCK ]]; then
+    rm -f "$OIDC_SOCK"
+  fi
+  if [[ -d ${OIDC_SOCK%/*} ]]; then
+    rmdir "${OIDC_SOCK%/*}"
+  fi
 fi
 
