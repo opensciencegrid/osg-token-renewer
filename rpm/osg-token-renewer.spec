@@ -1,7 +1,7 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
 Version:   0.6
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
 BuildArch: noarch
@@ -32,7 +32,7 @@ install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 install -dm750 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -m 755 %{name}.py $RPM_BUILD_ROOT/%{_bindir}/%{name}
 install -m 755 %{name}.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}.sh
-install -m 755 %{name}-setup.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}-setup.sh
+install -m 755 %{name}-setup.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}-setup
 install -m 640 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
@@ -58,7 +58,7 @@ getent passwd %svc_acct >/dev/null || \
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_bindir}/%{name}.sh
-%{_bindir}/%{name}-setup.sh
+%{_bindir}/%{name}-setup
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.timer
 
@@ -67,6 +67,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
 %changelog
+* Tue Sep 28 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.6-2
+- Drop .sh suffix on setup script
+
 * Wed Sep 22 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.6-1
 - Set AmbientCapabilities in systemd unit, for child processes (SOFTWARE-4719)
 
