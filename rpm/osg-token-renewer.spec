@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.7
+Version:   0.7.1
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -67,6 +67,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
 %changelog
+* Thu Sep 30 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.7.1-1
+- Fix indentation bug with zero or multiple tokens (SOFTWARE-4719)
+
 * Tue Sep 28 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.7-1
 - Fix exit status for main service script (SOFTWARE-4719)
 
