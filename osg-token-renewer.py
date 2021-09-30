@@ -98,7 +98,7 @@ def make_all_tokens(cfgx):
             emsg(f"Failed to write token '{t}': {e}")
             errors += 1
 
-        return errors
+    return errors
 
 
 def option_if(name, val):
