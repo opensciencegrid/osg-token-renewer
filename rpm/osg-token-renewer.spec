@@ -67,6 +67,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,root,%svc_acct) %config(noreplace) %{_sysconfdir}/osg/token-renewer/config.ini
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
+%doc README.md
+
+
 %changelog
 * Fri Oct 01 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.7.2-1
 - Move scripts out of harm's way (SOFTWARE-4719)
