@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.7.1
+Version:   0.7.2
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -27,12 +27,13 @@ Requires:  oidc-agent
 find . -type f -exec \
     sed -ri '1s,^#!\s*(/usr)?/bin/(env *)?python.*,#!%{__python},' '{}' +
 
-install -d $RPM_BUILD_ROOT/%{_bindir}
+install -d $RPM_BUILD_ROOT/%{_sbindir}
+install -d $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
 install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 install -dm750 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
-install -m 755 %{name}.py $RPM_BUILD_ROOT/%{_bindir}/%{name}
-install -m 755 %{name}.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}.sh
-install -m 755 %{name}-setup.sh $RPM_BUILD_ROOT/%{_bindir}/%{name}-setup
+install -m 755 %{name}.py $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/%{name}
+install -m 755 %{name}.sh $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/%{name}.sh
+install -m 755 %{name}-setup.sh $RPM_BUILD_ROOT/%{_sbindir}/%{name}-setup
 install -m 640 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
@@ -56,9 +57,9 @@ getent passwd %svc_acct >/dev/null || \
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/%{name}
-%{_bindir}/%{name}.sh
-%{_bindir}/%{name}-setup
+%{_libexecdir}/%{name}/%{name}
+%{_libexecdir}/%{name}/%{name}.sh
+%{_sbindir}/%{name}-setup
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.timer
 
@@ -67,6 +68,9 @@ getent passwd %svc_acct >/dev/null || \
 %attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
 
 %changelog
+* Fri Oct 01 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.7.2-1
+- Move scripts out of harm's way (SOFTWARE-4719)
+
 * Thu Sep 30 2021 Carl Edquist <edquist@cs.wisc.edu> - 0.7.1-1
 - Fix indentation bug with zero or multiple tokens (SOFTWARE-4719)
 
