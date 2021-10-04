@@ -1,7 +1,7 @@
 #!/bin/bash
 
 eval $(oidc-agent) >/dev/null
-osg-token-renewer
+"$(dirname "$0")"/osg-token-renewer
 oidc-agent -k >/dev/null
 
 # oidc-agent does not clean up its old socket files, apparently
