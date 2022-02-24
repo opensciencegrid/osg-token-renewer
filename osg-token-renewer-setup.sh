@@ -13,7 +13,8 @@ usage () {
   echo "  --manual                     Manual client registration"
   exit 1
 }
-
+pwfile=
+manual=
 while [[ $1 = -* ]]; do
 case $1 in
   --pw-file ) pwfile=$2; shift 2 ;;
