@@ -110,6 +110,12 @@ def mktoken(cfg):
     prog    = ['oidc-token']
     aud     = option_if('aud',   cfg.get("audience")    )
     scope   = option_if('scope', cfg.get("scope")       )
+    if scope == []:
+        # A blank scope tells oidc-token to request the default scopes of
+        # the refresh token instead of re-requesting the original scopes.
+        # (This is temporarily -- until April '22 -- needed by the CILogon
+        # issuer and generally a better way to do this).
+        scope = ["--scope", " "]
     time    = option_if('time',  cfg.get("min_lifetime"))
     account = [cfg.get("account")]
     cmdline = prog + aud + scope + time + account
