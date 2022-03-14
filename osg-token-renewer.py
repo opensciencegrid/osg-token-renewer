@@ -126,7 +126,9 @@ def mktoken(cfg):
 
 def add_account(acct, pwfile):
     pwcmd = "cat '%s'" % pwfile.replace("'", r"'\''")
-    cmd = ["oidc-add", "--pw-cmd=%s" % pwcmd, acct]
+    # --pw-store is needed for issuers like CILogon that make a new
+    # refresh token every time an access token is requested
+    cmd = ["oidc-add", "--pw-store", "--pw-cmd=%s" % pwcmd, acct]
     out = subprocess.check_output(cmd).strip().decode('utf-8')
     print("# oidc-add ... %s (%s)" % (acct, out))
 
