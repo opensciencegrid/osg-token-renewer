@@ -4,6 +4,10 @@ set -e
 fail () { echo "$@" >&2; exit 1; }
 
 usage () {
+  if [[ $1 ]]; then
+    echo "$*"
+    echo
+  fi
   echo "usage: $(basename "$0") [options] CLIENT_NAME"
   echo
   echo "   eg: $(basename "$0") myclient123"
@@ -28,6 +32,8 @@ done
 
 [[ $1 ]] || usage
 [[ $2 ]] && usage
+
+[[ $UID = 0 || $USER = osg-token-svc ]] || usage '*** Please run as root!'
 
 client_name=$1
 [[ $pwfile ]] || pwfile=/etc/osg/tokens/$client_name.pw
