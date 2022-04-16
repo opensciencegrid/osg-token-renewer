@@ -11,7 +11,7 @@ OIDC_SOCK   = '/var/run/osg-token-renewer/oidc-agent'
 #As root, the user runs oidc-gen -w device ACCOUNT_SHORTNAME
 
 # oidc-gen -w device ClientNameo
-# - misc prompts, including password, which can be got with --pw-cmd=CMD
+# - misc prompts, including password, which can be got with --pw-file=FILE
 
 # oidc-token --aud="<SERVER AUDIENCE>" <CLIENT NAME>
 
@@ -129,10 +129,9 @@ def mktoken(cfg):
 
 
 def add_account(acct, pwfile):
-    pwcmd = "cat '%s'" % pwfile.replace("'", r"'\''")
     # --pw-store is needed for issuers like CILogon that make a new
     # refresh token every time an access token is requested
-    cmd = ["oidc-add", "--pw-store", "--pw-cmd=%s" % pwcmd, acct]
+    cmd = ["oidc-add", "--pw-store", "--pw-file=%s" % pwfile, acct]
     out = subprocess.check_output(cmd).strip().decode('utf-8')
     print("# oidc-add ... %s (%s)" % (acct, out))
 
