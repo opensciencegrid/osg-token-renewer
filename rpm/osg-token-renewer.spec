@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.8.1
+Version:   0.8.2
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -8,7 +8,7 @@ BuildArch: noarch
 
 Source0:   %{name}-%{version}.tar.gz
 
-Requires:  oidc-agent
+Requires:  oidc-agent >= 4.2.0
 
 %define svc_acct osg-token-svc
 
@@ -71,6 +71,11 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %changelog
+* Fri Apr 15 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.2-1
+- Fix password file handling for restricted permissions in setup script (#17)
+- Use newer --pw-file option for oidc-add (SOFTWARE-5050)
+- Bump version requirement for oidc-agent package (SOFTWARE-5050)
+
 * Mon Mar 14 2022 Brian Lin <blin@cs.wisc.edu> - 0.8.1-1
 - Add the --pw-store option to the invocation of oidc-add and add a default
   scope of blank if no scopes are configured.  These are needed for the
