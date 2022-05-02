@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.8.1
+Version:   0.8.2
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -71,6 +71,9 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %changelog
+* Thu Apr 28 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.2-1
+- Increase renewal frequency to ensure continual validity (SOFTWARE-5137)
+
 * Mon Mar 14 2022 Brian Lin <blin@cs.wisc.edu> - 0.8.1-1
 - Add the --pw-store option to the invocation of oidc-add and add a default
   scope of blank if no scopes are configured.  These are needed for the
