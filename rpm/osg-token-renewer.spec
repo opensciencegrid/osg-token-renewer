@@ -71,7 +71,8 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %changelog
-* Fri Apr 15 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.2-1
+* Thu Apr 28 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.2-1
+- Increase renewal frequency to ensure continual validity (SOFTWARE-5137)
 - Fix password file handling for restricted permissions in setup script (#17)
 - Use newer --pw-file option for oidc-add (SOFTWARE-5050)
 - Bump version requirement for oidc-agent package (SOFTWARE-5050)
