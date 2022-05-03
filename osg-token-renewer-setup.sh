@@ -49,6 +49,10 @@ cleanup () {
 [[ -e $pwfile ]] ||
 fail "please create /etc/osg/tokens/$client_name.pw with encryption password"
 
+# Note: cannot pass --pw-file option to the script run as the service account,
+# as the service account may not have access to open the file by name for
+# reading.  Instead, we open the file as root for the service account process
+# to inherit the already-open file descriptor.
 if [[ $UID = 0 ]]; then
   # open $pwfile as root, then re-run this script under service account
   exec su osg-token-svc -s /bin/bash -c '"$@"' -- - \
