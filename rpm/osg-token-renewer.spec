@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.8.2
+Version:   0.8.3
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
@@ -71,6 +71,9 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %changelog
+* Fri Aug 26 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.3-1
+- Handle tighter permissions on tokens dir and pwfile (SOFTWARE-5304)
+
 * Thu Apr 28 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.2-1
 - Increase renewal frequency to ensure continual validity (SOFTWARE-5137)
 - Fix password file handling for restricted permissions in setup script (#17)
