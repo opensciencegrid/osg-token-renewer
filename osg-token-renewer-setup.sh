@@ -36,7 +36,19 @@ done
 [[ $UID = 0 || $USER = osg-token-svc ]] || usage '*** Please run as root!'
 
 client_name=$1
-[[ $pwfile ]] || pwfile=/etc/osg/tokens/$client_name.pw
+if [[ $pwfd ]]; then
+  if [[ $pwfile ]]; then
+    usage "*** The --pw-file and --pw-fd options are mutually exclusive."
+  fi
+  pwfile=/dev/fd/$pwfd  # for existence check, not for opening
+  [[ -e /dev/fd/$pwfd ]] ||
+  fail "password fd $pwfd does not appear to be open"
+else
+  [[ $pwfile ]] || pwfile=/etc/osg/tokens/$client_name.pw
+
+  [[ -e $pwfile ]] ||
+  fail "please create /etc/osg/tokens/$client_name.pw with encryption password"
+fi
 
 cleanup () {
   oidc-agent -k >/dev/null
@@ -45,9 +57,6 @@ cleanup () {
     [[ -d ${OIDC_SOCK%/*} ]] && rmdir "${OIDC_SOCK%/*}"
   fi
 }
-
-[[ -e $pwfile ]] ||
-fail "please create /etc/osg/tokens/$client_name.pw with encryption password"
 
 # Note: cannot pass --pw-file option to the script run as the service account,
 # as the service account may not have access to open the file by name for
