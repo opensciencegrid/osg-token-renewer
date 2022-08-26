@@ -40,7 +40,6 @@ if [[ $pwfd ]]; then
   if [[ $pwfile ]]; then
     usage "*** The --pw-file and --pw-fd options are mutually exclusive."
   fi
-  pwfile=/dev/fd/$pwfd  # for existence check, not for opening
   [[ -e /dev/fd/$pwfd ]] ||
   fail "password fd $pwfd does not appear to be open"
 else
