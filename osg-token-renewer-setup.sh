@@ -36,7 +36,18 @@ done
 [[ $UID = 0 || $USER = osg-token-svc ]] || usage '*** Please run as root!'
 
 client_name=$1
-[[ $pwfile ]] || pwfile=/etc/osg/tokens/$client_name.pw
+if [[ $pwfd ]]; then
+  if [[ $pwfile ]]; then
+    usage "*** The --pw-file and --pw-fd options are mutually exclusive."
+  fi
+  [[ -e /dev/fd/$pwfd ]] ||
+  fail "password fd $pwfd does not appear to be open"
+else
+  [[ $pwfile ]] || pwfile=/etc/osg/tokens/$client_name.pw
+
+  [[ -e $pwfile ]] ||
+  fail "please create /etc/osg/tokens/$client_name.pw with encryption password"
+fi
 
 cleanup () {
   oidc-agent -k >/dev/null
@@ -46,18 +57,16 @@ cleanup () {
   fi
 }
 
-[[ -e $pwfile ]] ||
-fail "please create /etc/osg/tokens/$client_name.pw with encryption password"
-
 # Note: cannot pass --pw-file option to the script run as the service account,
 # as the service account may not have access to open the file by name for
 # reading.  Instead, we open the file as root for the service account process
 # to inherit the already-open file descriptor.
 if [[ $UID = 0 ]]; then
   # open $pwfile as root, then re-run this script under service account
-  exec su osg-token-svc -s /bin/bash -c '"$@"' -- - \
-  "$0" $manual --pw-fd 9 "$client_name"
-fi 9<"$pwfile"
+  { exec su osg-token-svc -s /bin/bash -c '"$@"' -- - \
+    "$0" $manual --pw-fd 9 "$client_name"
+  } 9<"$pwfile"
+fi
 
 eval $(oidc-agent)
 trap cleanup EXIT
