@@ -1,14 +1,14 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
 Version:   0.8.3
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
 BuildArch: noarch
 
 Source0:   %{name}-%{version}.tar.gz
 
-Requires:  oidc-agent >= 4.2.0
+Requires:  oidc-agent-cli >= 4.2.0
 
 %define svc_acct osg-token-svc
 
@@ -71,6 +71,9 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %changelog
+* Fri May 19 2023 John Thiltges <jthiltges@unl.edu> - 0.8.3-2
+- Install oidc-agent-cli instead of -desktop via metapackage (SOFTWARE-5409)
+
 * Fri Aug 26 2022 Carl Edquist <edquist@cs.wisc.edu> - 0.8.3-1
 - Handle tighter permissions on tokens dir and pwfile (SOFTWARE-5304)
 
