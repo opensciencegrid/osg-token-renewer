@@ -1,7 +1,7 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
 Version:   0.8.3
-Release:   2%{?dist}
+Release:   3%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
 BuildArch: noarch
