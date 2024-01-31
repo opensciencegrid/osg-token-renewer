@@ -1,14 +1,14 @@
 Name:      osg-token-renewer
 Summary:   oidc-agent token renewal service and timer
-Version:   0.8.3
-Release:   2%{?dist}
+Version:   0.9.0
+Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.opensciencegrid.org
 BuildArch: noarch
 
 Source0:   %{name}-%{version}.tar.gz
 
-Requires:  oidc-agent-cli >= 4.2.0
+Requires:  oidc-agent-cli >= 5.1.0
 
 %define svc_acct osg-token-svc
 
@@ -71,6 +71,12 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %changelog
+* Wed Jan 31 2024 Dave Dykstra - 0.9.0-1
+- Require oidc-agent-cli-5.1.0, and use a new oidc-add --skip-check option
+  there to avoid trying to get an access token at load time.  This avoids
+  a 'No scopes found' error when the token issuer returns different scopes
+  than requested (e.g. wlcg.capabilityset which returns a set of scopes).
+
 * Fri May 19 2023 John Thiltges <jthiltges@unl.edu> - 0.8.3-2
 - Install oidc-agent-cli instead of -desktop via metapackage (SOFTWARE-5409)
 
