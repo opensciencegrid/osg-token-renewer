@@ -130,8 +130,10 @@ def mktoken(cfg):
 
 def add_account(acct, pwfile):
     # --pw-store is needed for issuers like CILogon that make a new
-    # refresh token every time an access token is requested
-    cmd = ["oidc-add", "--pw-store", "--pw-file=%s" % pwfile, acct]
+    # refresh token every time an access token is requested.
+    # --skip-check prevents attempting to get an access token from
+    # the token issuer at load time.
+    cmd = ["oidc-add", "--skip-check", "--pw-store", "--pw-file=%s" % pwfile, acct]
     out = subprocess.check_output(cmd).strip().decode('utf-8')
     print("# oidc-add ... %s (%s)" % (acct, out))
 
