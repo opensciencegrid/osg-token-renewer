@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! grep -q '^[[:space:]]*password_file[[:space:]]*=' /etc/osg/token-renewer/config.ini; then
+  # client credentials mode only
+  exec "$(dirname "$0")"/osg-token-renewer
+fi
+
 eval $(oidc-agent) >/dev/null
 "$(dirname "$0")"/osg-token-renewer
 oidc-agent -k >/dev/null

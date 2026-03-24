@@ -1,13 +1,14 @@
 Name:      osg-token-renewer
-Summary:   oidc-agent token renewal service and timer
-Version:   0.9.0
+Summary:   token renewal service and timer using OIDC or client credentials
+Version:   1.0.0
 Release:   1%{?dist}
 License:   ASL 2.0
-URL:       http://www.opensciencegrid.org
+URL:       http://www.osg-htc.org
 BuildArch: noarch
 
 Source0:   %{name}-%{version}.tar.gz
 
+Requires:  %{name}-client = %{version}-%{release}
 Requires:  oidc-agent-cli >= 5.1.0
 
 %define svc_acct osg-token-svc
@@ -16,7 +17,16 @@ Requires:  oidc-agent-cli >= 5.1.0
 
 
 %description
-%summary
+
+%package client
+Summary:   token renewal service and timer using client credentials
+
+Requires:  jq
+Requires:  curl
+Requires:  python3-requests
+Requires:  python3-jwt
+
+%description client
 
 %prep
 %setup -q
@@ -29,7 +39,7 @@ find . -type f -exec \
 
 install -d $RPM_BUILD_ROOT/%{_sbindir}
 install -d $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
-install -dm700 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
+install -dm770 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/tokens
 install -dm750 $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -m 755 %{name}.py $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/%{name}
 install -m 755 %{name}.sh $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/%{name}.sh
@@ -38,13 +48,13 @@ install -m 640 config.ini $RPM_BUILD_ROOT/%{_sysconfdir}/osg/token-renewer
 install -d $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.timer $RPM_BUILD_ROOT/%{_unitdir}
-install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%svc_acct
+install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%{svc_acct}
 
 %pre
-getent group  %svc_acct >/dev/null || groupadd -r %svc_acct
-getent passwd %svc_acct >/dev/null || \
-       useradd -r -g %svc_acct -c "OSG Token Renewal Service" \
-       -s /sbin/nologin -d %{_localstatedir}/spool/%svc_acct %svc_acct
+getent group  %{svc_acct} >/dev/null || groupadd -r %{svc_acct}
+getent passwd %{svc_acct} >/dev/null || \
+       useradd -r -g %{svc_acct} -c "OSG Token Renewal Service" \
+       -s /sbin/nologin -d %{_localstatedir}/spool/%{svc_acct} %{svc_acct}
 
 %post
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
@@ -56,6 +66,9 @@ getent passwd %svc_acct >/dev/null || \
 
 
 %files
+# Empty intentionally; the main package is a metapackage
+
+%files client
 %defattr(-,root,root,-)
 %{_libexecdir}/%{name}/%{name}
 %{_libexecdir}/%{name}/%{name}.sh
@@ -63,14 +76,26 @@ getent passwd %svc_acct >/dev/null || \
 %{_unitdir}/%{name}.service
 %{_unitdir}/%{name}.timer
 
-%dir %{_sysconfdir}/osg/tokens
-%attr(-,root,%svc_acct) %config(noreplace) %{_sysconfdir}/osg/token-renewer/config.ini
-%attr(-,%svc_acct,%svc_acct) %dir %{_localstatedir}/spool/%svc_acct
+%attr(-,root,%{svc_acct}) %dir %{_sysconfdir}/osg/tokens
+%attr(-,root,%{svc_acct}) %config(noreplace) %{_sysconfdir}/osg/token-renewer/config.ini
+%attr(-,%{svc_acct},%{svc_acct}) %dir %{_localstatedir}/spool/%{svc_acct}
 
 %doc README.md
 
 
 %changelog
+* Wed Mar 25 2026 Dave Dykstra - 1.0.0-1
+- Add "--client-credentials" option to osg-token-renewer-setup which configures
+  a mode that directly connects with grant_type=client_credentials to an Oauth
+  token endpoint to fetch access tokens.
+- Move all the files into a osg-token-renewer-client subpackage that does
+  not require the oidc-agent package.  When oidc-agent is not installed, only
+  the client credentials mode works.
+- Change the group of the /etc/osg/tokens directory to osg-token-svc and make
+  the directory fully accessible to the osg-token-svc group. This enabled
+  removing the extra capabilities given to the systemd service, making it a
+  little more secure.
+
 * Wed Jan 31 2024 Dave Dykstra - 0.9.0-1
 - Require oidc-agent-cli-5.1.0, and use a new oidc-add --skip-check option
   there to avoid trying to get an access token at load time.  This avoids

@@ -1,11 +1,11 @@
 [Unit]
 Description=Timer for running OSG Token Renewer regularly
-   
+
 [Timer]
 OnBootSec=15min
 OnUnitActiveSec=10min
 RandomizedDelaySec=3min
 Unit=osg-token-renewer.service
-   
+
 [Install]
 WantedBy=multi-user.target
