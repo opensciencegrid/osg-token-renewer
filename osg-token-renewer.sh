@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if ! grep -q '^[[:space:]]*password_file[[:space:]]*=' /etc/osg/token-renewer/config.ini; then
+CONFIG_PATH="${OSG_TOKEN_RENEWER_CONFIG_PATH:-/etc/osg/token-renewer/config.ini}"
+
+if ! grep -q '^[[:space:]]*password_file[[:space:]]*=' "$CONFIG_PATH"; then
   # client credentials mode only
   exec "$(dirname "$0")"/osg-token-renewer
 fi
