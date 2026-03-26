@@ -2,6 +2,9 @@
 
 import configparser
 import subprocess
+import requests
+import jwt
+import time
 import sys
 import os
 
@@ -29,6 +32,7 @@ def get_config_dict(config):
             return emsg(f"Unrecognized config section '{sec}'")
         type_, name = ss
         cfgx[type_][name] = config[sec]
+        cfgx[type_][name]['name'] = name
 
     return cfgx
 
@@ -39,14 +43,20 @@ E_NO_TOK_ACCT_SEC  = (
     "Config for [token {token}]: missing [account {account}] section")
 E_NO_TOK_PATH_ATTR = (
     "Config section [token {token}]: missing 'token_path' attribute")
-E_NO_ACCT_PW_ATTR  = (
-    "Config section [account {account}]: missing 'password_file' attribute")
+E_NO_ACCT_PW_OR_TRU_ATTR  = (
+    "Config section [account {account}]: missing both 'password_file' and 'token_request_url' attributes")
+E_NO_ACCT_CI_ATTR  = (
+    "Config section [account {account}]: missing 'client_id'")
+E_NO_ACCT_CS_ATTR  = (
+    "Config section [account {account}]: missing 'client_secret'")
+
 
 def validate_config_dict(cfgx):
     # the only mandatory attributes here are:
     #  - [token TOKEN].account exists, and references [account ACCOUNT]
     #  - [token TOKEN].token_path exists
-    #  - [account ACCOUNT].password_file exists
+    #  - [account ACCOUNT].password_file or [account ACCOUNT].token_request_url 
+    #    exists
 
     for token in cfgx["token"]:
         account = cfgx["token"][token].get("account")
@@ -57,7 +67,13 @@ def validate_config_dict(cfgx):
         elif not cfgx["token"][token].get("token_path"):
             return emsg(E_NO_TOK_PATH_ATTR, token=token)
         elif not cfgx["account"][account].get("password_file"):
-            return emsg(E_NO_ACCT_PW_ATTR, account=account)
+            if cfgx["account"][account].get("token_request_url"):
+                if not cfgx["account"][account].get("client_id"):
+                    return emsg(E_NO_ACCT_CI_ATTR, account=account)
+                elif not cfgx["account"][account].get("client_secret"):
+                    return emsg(E_NO_ACCT_CS_ATTR, account=account)
+            else:
+                return emsg(E_NO_ACCT_PW_OR_TRU_ATTR, account=account)
 
     return True
 
@@ -72,31 +88,26 @@ def add_all_accounts(cfgx):
         if acct in added:
             continue
         print("account %s" % acct)
-        pwfile = accounts[acct]['password_file']
-        try:
-            add_account(acct, pwfile)
-        except subprocess.CalledProcessError as e:
-            emsg(f"Failed to create account '{acct}': {e}")
-            errors += 1
+        if 'password_file' in accounts[acct]:
+            pwfile = accounts[acct]['password_file']
+            errors += add_account(acct, pwfile)
         added.add(acct)
 
     return errors
 
 
 def make_all_tokens(cfgx):
+    accounts = cfgx["account"]
     tokens = cfgx["token"]
     errors = 0
 
-    for t in tokens:
-        print("token %s" % t)
-        try:
-            mktoken(tokens[t])
-        except subprocess.CalledProcessError as e:
-            emsg(f"Failed to create token '{t}': {e}")
-            errors += 1
-        except IOError as e:
-            emsg(f"Failed to write token '{t}': {e}")
-            errors += 1
+    for token in tokens:
+        print("token %s" % token)
+        account = accounts[cfgx["token"][token].get("account")]
+        if 'password_file' in account:
+            errors += mk_oidc_token(tokens[token])
+        else:
+            errors += request_token(account, tokens[token])
 
     return errors
 
@@ -105,7 +116,20 @@ def option_if(name, val):
     return ['--{}={}'.format(name, val)] if val else []
 
 
-def mktoken(cfg):
+def write_token(cfg, token_blob):
+    dest    = cfg.get("token_path")
+    print("> %s" % dest)
+    try:
+        fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "wb+") as w:
+            w.write(token_blob)
+    except Exception as e:
+        emsg(f"Failed to write token '{cfg['name']}': {e}")
+        return 1
+    return 0
+
+
+def mk_oidc_token(cfg):
     #oidc-token --aud="<SERVER AUDIENCE>" <CLIENT NAME> > <TOKEN PATH>
     prog    = ['oidc-token']
     aud     = option_if('aud',   cfg.get("audience")    )
@@ -114,18 +138,79 @@ def mktoken(cfg):
         # A blank scope tells oidc-token to request the default scopes of
         # the refresh token instead of re-requesting the original scopes.
         scope = ["--scope", " "]
-    time    = option_if('time',  cfg.get("min_lifetime"))
-    account = [cfg.get("account")]
-    cmdline = prog + aud + scope + time + account
-    dest    = cfg.get("token_path")
+    min_lifetime = option_if('time',  cfg.get("min_lifetime"))
+    acct = cfg.get("account")
+    cmdline = prog + aud + scope + min_lifetime + [acct]
     print(cmdline)
-    token_blob = subprocess.check_output(cmdline)
+    t = cfg['name']
+    try:
+        token_blob = subprocess.check_output(cmdline)
+    except Exception as e:
+        emsg(f"Failed to get token '{t}': {e}")
+        return 1
     if token_blob:
-        print("> %s" % dest)
-        with open(dest, "wb") as w:
-            w.write(token_blob)
+        return write_token(cfg, token_blob)
     else:
-        emsg(f"No token generated for account '{account[0]}'")
+        emsg(f"No token '{t}' generated for account '{acct}'")
+        return 1
+
+    return 0
+
+
+def request_token(account, cfg):
+    t = cfg['name']
+    min_lifetime_str = cfg.get("min_lifetime")
+    if min_lifetime_str != None:
+        if not min_lifetime_str.isdigit():
+            emsg(f"min_lifetime for token '{t}' is not a non-negative integer")
+            return 1
+        min_lifetime = int(min_lifetime_str)
+        dest = cfg.get("token_path")
+        try:
+            with open(dest, 'r', encoding='utf-8') as file:
+                oldtok = file.read().strip()
+            options = {
+                "verify_signature": False,
+                "verify_aud": False,
+                "verify_exp": False
+            }
+            exp = jwt.decode(oldtok, options=options)['exp']
+            remaining = exp - int(time.time())
+            if remaining > min_lifetime:
+                emsg(f"{str(remaining)} seconds remaining in '{t}', not renewing")
+                return 0
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            emsg(f"Couldn't read old '{t}' token expiration time, continuing: {e}")
+
+    data={"grant_type": "client_credentials"}
+    aud = cfg.get("audience")
+    if aud != None:
+        data['audience'] = aud
+    scope = cfg.get("scope")
+    if scope != None:
+        data['scope'] = scope
+
+    try:
+        response = requests.post(
+            account['token_request_url'],
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            data=data,
+            auth=(account['client_id'], account['client_secret']),
+            timeout=10
+        )
+        response.raise_for_status()
+        response_data = response.json()
+    except Exception as e:
+        emsg(f"Failure requesting token '{t}': {e}")
+        return 1
+
+    if 'access_token' not in response_data:
+        emsg(f"No access_token returned in response for token '{t}'")
+        return 1
+    access_token = response_data['access_token'] + '\n'
+    return write_token(cfg, access_token.encode("utf-8"))
 
 
 def add_account(acct, pwfile):
@@ -134,20 +219,13 @@ def add_account(acct, pwfile):
     # --skip-check prevents attempting to get an access token from
     # the token issuer at load time.
     cmd = ["oidc-add", "--skip-check", "--pw-store", "--pw-file=%s" % pwfile, acct]
-    out = subprocess.check_output(cmd).strip().decode('utf-8')
+    try:
+        out = subprocess.check_output(cmd).strip().decode('utf-8')
+    except subprocess.CalledProcessError as e:
+        emsg(f"Failed to create account '{acct}': {e}")
+        return 1
     print("# oidc-add ... %s (%s)" % (acct, out))
-
-
-# handy functions, for potential use later to set file ownership
-#
-#import pwd, grp
-#
-#def get_uid(name):
-#    return pwd.getpwnam(name).pw_uid  # also, .pw_gid
-#
-#
-#def get_gid(gname):
-#    return grp.getgrnam(gname).gr_gid
+    return 0
 
 
 def main():
@@ -168,5 +246,5 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main() > 0)
+    sys.exit(int(main() > 0))
 

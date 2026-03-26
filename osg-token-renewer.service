@@ -7,11 +7,6 @@ Group=osg-token-svc
 Type = oneshot
 ExecStart = /usr/libexec/osg-token-renewer/osg-token-renewer.sh
 
-# These provide dedicated user with the ability to switch UIDs/GIDs for
-# reading/writing files.
-CapabilityBoundingSet=CAP_SETUID CAP_SETGID CAP_DAC_OVERRIDE
-AmbientCapabilities=CAP_SETGID CAP_SETUID CAP_DAC_OVERRIDE
-
 [Install]
 WantedBy=multi-user.target
 
