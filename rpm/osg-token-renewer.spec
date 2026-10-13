@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   token renewal service and timer using OIDC or client credentials
-Version:   1.0.0
+Version:   1.0.1
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.osg-htc.org
@@ -84,6 +84,9 @@ getent passwd %{svc_acct} >/dev/null || \
 
 
 %changelog
+* Tue Oct 13 2026 Dave Dykstra - 1.0.1-1
+- Move the pre/post/preun/postun scriptlets to the client package as well.
+
 * Wed Mar 25 2026 Dave Dykstra - 1.0.0-1
 - Add "--client-credentials" option to osg-token-renewer-setup which configures
   a mode that directly connects with grant_type=client_credentials to an Oauth
