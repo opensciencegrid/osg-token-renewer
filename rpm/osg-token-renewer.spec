@@ -1,6 +1,6 @@
 Name:      osg-token-renewer
 Summary:   token renewal service and timer using OIDC or client credentials
-Version:   1.0.0
+Version:   1.0.1
 Release:   1%{?dist}
 License:   ASL 2.0
 URL:       http://www.osg-htc.org
@@ -50,18 +50,18 @@ install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.timer $RPM_BUILD_ROOT/%{_unitdir}
 install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%{svc_acct}
 
-%pre
+%pre client
 getent group  %{svc_acct} >/dev/null || groupadd -r %{svc_acct}
 getent passwd %{svc_acct} >/dev/null || \
        useradd -r -g %{svc_acct} -c "OSG Token Renewal Service" \
        -s /sbin/nologin -d %{_localstatedir}/spool/%{svc_acct} %{svc_acct}
 
-%post
+%post client
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post %{name}.service %{name}.timer
-%preun
+%preun client
 %systemd_preun %{name}.service %{name}.timer
-%postun
+%postun client
 %systemd_postun_with_restart %{name}.service %{name}.timer
 
 
@@ -84,6 +84,9 @@ getent passwd %{svc_acct} >/dev/null || \
 
 
 %changelog
+* Tue Oct 13 2026 Dave Dykstra - 1.0.1-1
+- Move the pre/post/preun/postun scriptlets to the client package as well.
+
 * Wed Mar 25 2026 Dave Dykstra - 1.0.0-1
 - Add "--client-credentials" option to osg-token-renewer-setup which configures
   a mode that directly connects with grant_type=client_credentials to an Oauth
