@@ -50,18 +50,18 @@ install -m 644 %{name}.service $RPM_BUILD_ROOT/%{_unitdir}
 install -m 644 %{name}.timer $RPM_BUILD_ROOT/%{_unitdir}
 install -d -m 700 $RPM_BUILD_ROOT/%{_localstatedir}/spool/%{svc_acct}
 
-%pre
+%pre client
 getent group  %{svc_acct} >/dev/null || groupadd -r %{svc_acct}
 getent passwd %{svc_acct} >/dev/null || \
        useradd -r -g %{svc_acct} -c "OSG Token Renewal Service" \
        -s /sbin/nologin -d %{_localstatedir}/spool/%{svc_acct} %{svc_acct}
 
-%post
+%post client
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post %{name}.service %{name}.timer
-%preun
+%preun client
 %systemd_preun %{name}.service %{name}.timer
-%postun
+%postun client
 %systemd_postun_with_restart %{name}.service %{name}.timer
 
 
